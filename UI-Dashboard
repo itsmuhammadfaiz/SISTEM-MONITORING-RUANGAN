@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :root {
+      color-scheme: light;
+
+      --surface: #ffffff;
+      --text-title: #202938;
+      --text-body: #354052;
+      --text-secondary: #687589;
+      --border: #e6ebf1;
+
+      --font-primary: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-values: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      position: relative;
+      background: transparent;
+      color: var(--text-body);
+      font-family: var(--font-primary);
+    }
+
+    /* MAIN CONTAINER */
+    .stage {
+      position: absolute;
+      inset: 0;
+      padding: clamp(12px, 2.5cqw, 22px);
+      overflow: auto;
+      container-type: inline-size;
+    }
+
+    /* DASHBOARD GRID */
+    .datastream-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: minmax(210px, 1fr);
+      align-content: center;
+      min-height: 100%;
+      gap: clamp(12px, 1.8cqw, 18px);
+    }
+
+    /* CARD */
+    .datastream-card {
+      --accent-color: #249bb4;
+      --card-background: #eaf6f9;
+
+      position: relative;
+      display: block;
+
+      min-width: 0;
+      min-height: 210px;
+
+      padding: 18px;
+
+      overflow: hidden;
+
+      background: var(--card-background);
+      border: 1px solid color-mix(
+        in srgb,
+        var(--accent-color) 18%,
+        white
+      );
+
+      border-radius: 16px;
+
+      box-shadow:
+        0 2px 8px rgba(31, 45, 61, 0.045),
+        0 1px 2px rgba(31, 45, 61, 0.025);
+
+      container-type: inline-size;
+
+      transition: box-shadow 0.2s ease;
+    }
+
+    /* SUBTLE ACCENT */
+    .datastream-card::before {
+      content: "";
+
+      position: absolute;
+      top: 0;
+      left: 18px;
+      right: 18px;
+
+      height: 3px;
+
+      background: var(--accent-color);
+      border-radius: 0 0 5px 5px;
+      opacity: 0.8;
+    }
+
+    /* HEADER */
+    .datastream-card__header {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+
+      z-index: 2;
+
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      min-width: 0;
+    }
+
+    /* ICON */
+    .datastream-card__icon {
+      display: flex;
+      flex: 0 0 auto;
+
+      align-items: center;
+      justify-content: center;
+
+      width: 36px;
+      height: 36px;
+
+      border-radius: 10px;
+
+      color: var(--accent-color);
+
+      background: color-mix(
+        in srgb,
+        var(--accent-color) 13%,
+        white
+      );
+    }
+
+    .datastream-card__icon svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* LABEL */
+    .datastream-card__label {
+      flex: 1;
+      min-width: 0;
+
+      color: #455164;
+
+      font-family: var(--font-primary);
+      font-size: clamp(12px, 5.2cqw, 14px);
+      font-weight: 700;
+
+      line-height: 1.35;
+      text-align: left;
+
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    /* VALUE - EXACT CENTER OF CARD */
+    .datastream-card__value {
+      position: absolute;
+
+      inset: 0;
+
+      z-index: 1;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 100%;
+      height: 100%;
+
+      padding: 38px 14px 10px;
+
+      color: #202938;
+
+      font-family: var(--font-values);
+      font-size: clamp(36px, 18cqw, 50px);
+      font-weight: 800;
+
+      line-height: 1.15;
+      letter-spacing: -0.045em;
+
+      text-align: center;
+
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    /* TEXT STATUS */
+    .datastream-card--textual .datastream-card__value {
+      padding: 42px 14px 12px;
+
+      font-family: var(--font-primary);
+      font-size: clamp(17px, 8cqw, 23px);
+      font-weight: 750;
+
+      line-height: 1.35;
+      letter-spacing: -0.025em;
+
+      text-align: center;
+    }
+
+    /* UNIT */
+    .datastream-card__unit {
+      flex: 0 0 auto;
+
+      margin-left: 5px;
+
+      color: #667386;
+
+      font-family: var(--font-primary);
+      font-size: 0.42em;
+      font-weight: 700;
+
+      letter-spacing: normal;
+      white-space: nowrap;
+    }
+
+    /* COLOR THEMES */
+
+    .datastream-card--theme-0 {
+      --accent-color: #209bb5;
+      --card-background: #e8f5f8;
+    }
+
+    .datastream-card--theme-1 {
+      --accent-color: #199c70;
+      --card-background: #e9f5ef;
+    }
+
+    .datastream-card--theme-2 {
+      --accent-color: #8257d7;
+      --card-background: #f0ebfa;
+    }
+
+    .datastream-card--theme-3 {
+      --accent-color: #c78a36;
+      --card-background: #faf1e4;
+    }
+
+    .datastream-card--theme-4 {
+      --accent-color: #d04c9d;
+      --card-background: #f9eaf3;
+    }
+
+    .datastream-card--theme-5 {
+      --accent-color: #4774d4;
+      --card-background: #eaf0fb;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      height: 100%;
+      padding: 12px;
+
+      color: #778397;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    /* TABLET */
+    @media (max-width: 650px) {
+      .datastream-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(180px, 1fr);
+        gap: 12px;
+      }
+
+      .datastream-card {
+        min-height: 180px;
+        padding: 13px;
+        border-radius: 14px;
+      }
+
+      .datastream-card::before {
+        left: 13px;
+        right: 13px;
+      }
+
+      .datastream-card__header {
+        top: 14px;
+        left: 13px;
+        right: 13px;
+        gap: 8px;
+      }
+
+      .datastream-card__icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .datastream-card__icon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .datastream-card__value {
+        font-size: clamp(32px, 17cqw, 43px);
+        padding: 38px 10px 8px;
+      }
+
+      .datastream-card--textual .datastream-card__value {
+        font-size: clamp(15px, 8cqw, 20px);
+        padding: 40px 10px 8px;
+      }
+    }
+
+    /* SMALL MOBILE */
+    @media (max-width: 340px) {
+      .datastream-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <div class="datastream-grid" id="datastream-grid"></div>
+
+    <div class="empty-state" id="empty-state">
+      No datastreams assigned to this widget yet.
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const DATASTREAM_TYPES = {
+        ENUM: 'ENUM',
+        INT: 'INT',
+        DOUBLE: 'DOUBLE'
+      };
+
+      const CARD_THEME_COUNT = 6;
+
+      const ICONS = {
+        temperature: `
+          <path d="M9.5 14.4V4.75a2.5 2.5 0 0 1 5 0v9.65a4.25 4.25 0 1 1-5 0z"/>
+          <line x1="12" y1="7" x2="12" y2="13.5"/>
+        `,
+
+        humidity: `
+          <path d="M12 2.5s6.5 7.6 6.5 12A6.5 6.5 0 1 1 5.5 14.5C5.5 10.1 12 2.5 12 2.5z"/>
+        `,
+
+        energy: `
+          <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>
+        `,
+
+        battery: `
+          <rect x="2.5" y="7.5" width="16" height="9" rx="2"/>
+          <rect x="19.5" y="10.5" width="2" height="3" rx="1"/>
+          <rect x="5" y="10" width="8" height="4" rx="1"
+            fill="currentColor" stroke="none"/>
+        `,
+
+        gauge: `
+          <path d="M4 15a8 8 0 1 1 16 0"/>
+          <line x1="12" y1="15" x2="15.5" y2="10.5"/>
+          <circle cx="12" cy="15" r="1.4"
+            fill="currentColor" stroke="none"/>
+        `,
+
+        airflow: `
+          <path d="M3 8h11a2.5 2.5 0 1 0-2.5-2.5"/>
+          <path d="M3 13h14a2.5 2.5 0 1 1-2.5 2.5"/>
+          <path d="M3 18h9a2 2 0 1 0-2-2"/>
+        `,
+
+        connection: `
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        `,
+
+        wifi: `
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+          <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        `,
+
+        light: `
+          <path d="M9 18h6"/>
+          <path d="M10 22h4"/>
+          <path d="M8.5 14.5a7 7 0 1 1 7 0c-.8.6-1.2 1.5-1.2 2.5h-4.6c0-1-.4-1.9-1.2-2.5z"/>
+        `,
+
+        sensor: `
+          <path d="M12 2v3"/>
+          <path d="M12 19v3"/>
+          <path d="M4.93 4.93l2.12 2.12"/>
+          <path d="M16.95 16.95l2.12 2.12"/>
+          <path d="M2 12h3"/>
+          <path d="M19 12h3"/>
+          <path d="M4.93 19.07l2.12-2.12"/>
+          <path d="M16.95 7.05l2.12-2.12"/>
+          <circle cx="12" cy="12" r="4"/>
+        `,
+
+        default: `
+          <rect x="3.5" y="12" width="4" height="8" rx="1"/>
+          <rect x="10" y="7" width="4" height="13" rx="1"/>
+          <rect x="16.5" y="3.5" width="4" height="16.5" rx="1"/>
+        `
+      };
+
+      const bridge = createBridge();
+
+      const gridElement =
+        document.getElementById('datastream-grid');
+
+      const emptyStateElement =
+        document.getElementById('empty-state');
+
+      const cardReferences = new Map();
+
+      /* BLYNK BRIDGE */
+      function createBridge() {
+        if (typeof BlynkBridge !== 'undefined') {
+          return new BlynkBridge({
+            logEnabled: true,
+            isOnErrorEnabled: true
+          });
+        }
+
+        return {
+          isBridgeAvailable: false,
+
+          sendValue() {},
+          sendError() {},
+          log() {},
+          setCallbacks() {},
+          setOnErrorEnabled() {},
+          setLogging() {},
+
+          isExternalRequestsAllowed: () => false,
+          isRangePickerSupported: () => false,
+          isPageActionsSupported: () => false,
+
+          showPage() {},
+          closePage() {},
+          closeAllPages() {},
+
+          getValue: () => Promise.reject('no bridge'),
+          getValues: () => Promise.reject('no bridge'),
+          getDeviceInfo: () => Promise.reject('no bridge'),
+          getTheme: () => Promise.reject('no bridge'),
+          getHistoricalData: () => Promise.reject('no bridge')
+        };
+      }
+
+      /* KEEP LIGHT THEME, ONLY ACCEPT BLYNK FONTS */
+      function applyTheme(theme) {
+        if (!theme) return;
+
+        const rootStyle = document.documentElement.style;
+
+        if (theme.primaryFont) {
+          rootStyle.setProperty(
+            '--font-primary',
+            theme.primaryFont
+          );
+        }
+
+        if (theme.widgetValuesFont) {
+          rootStyle.setProperty(
+            '--font-values',
+            theme.widgetValuesFont
+          );
+        }
+      }
+
+      /* ICON SELECTION */
+      function getIconMarkup(label) {
+        const name = String(label || '').toLowerCase();
+
+        if (/temp/.test(name)) return ICONS.temperature;
+
+        if (/hum/.test(name)) return ICONS.humidity;
+
+        if (/(volt|power|watt|energy|current|amp)/.test(name)) {
+          return ICONS.energy;
+        }
+
+        if (/batt/.test(name)) return ICONS.battery;
+
+        if (/(speed|rpm|press|rate)/.test(name)) {
+          return ICONS.gauge;
+        }
+
+        if (/(wind|fan|air)/.test(name)) {
+          return ICONS.airflow;
+        }
+
+        if (/(connection|connect)/.test(name)) {
+          return ICONS.connection;
+        }
+
+        if (/(wifi|signal)/.test(name)) {
+          return ICONS.wifi;
+        }
+
+        if (/(led|light)/.test(name)) {
+          return ICONS.light;
+        }
+
+        if (/(sensor|status)/.test(name)) {
+          return ICONS.sensor;
+        }
+
+        return ICONS.default;
+      }
+
+      function createIconElement(label) {
+        const iconElement = document.createElement('div');
+
+        iconElement.className = 'datastream-card__icon';
+
+        iconElement.innerHTML = `
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            ${getIconMarkup(label)}
+          </svg>
+        `;
+
+        return iconElement;
+      }
+
+      /* NUMBER FORMATTING */
+      function formatNumber(value, decimalFormat, isInteger) {
+        if (decimalFormat) {
+          const decimalCount =
+            (decimalFormat.split('.')[1] || '').length;
+
+          return value.toFixed(decimalCount);
+        }
+
+        if (isInteger) {
+          return String(Math.round(value));
+        }
+
+        return String(Math.round(value * 100) / 100);
+      }
+
+      /* UNIT */
+      function normalizeUnit(unit) {
+        if (!unit) return '';
+
+        const normalizedUnit = String(unit).trim();
+
+        if (
+          !normalizedUnit ||
+          normalizedUnit.toLowerCase() === 'none'
+        ) {
+          return '';
+        }
+
+        return normalizedUnit;
+      }
+
+      /* FORMAT DATASTREAM */
+      function formatDatastreamValue(datastream) {
+        if (datastream.type === DATASTREAM_TYPES.ENUM) {
+          const selectedIndex =
+            Number.parseInt(datastream.value, 10);
+
+          return {
+            text:
+              datastream.mappings?.[selectedIndex] ??
+              datastream.enumFallbackValue ??
+              datastream.value,
+            unit: ''
+          };
+        }
+
+        if (
+          datastream.type === DATASTREAM_TYPES.INT ||
+          datastream.type === DATASTREAM_TYPES.DOUBLE
+        ) {
+          const numericValue =
+            Number.parseFloat(datastream.value);
+
+          const formattedValue = Number.isNaN(numericValue)
+            ? datastream.value
+            : formatNumber(
+                numericValue,
+                datastream.decimalFormat,
+                datastream.type === DATASTREAM_TYPES.INT
+              );
+
+          return {
+            text: formattedValue,
+            unit:
+              normalizeUnit(datastream.suffix) ||
+              normalizeUnit(datastream.unit)
+          };
+        }
+
+        return {
+          text: datastream.value,
+          unit: ''
+        };
+      }
+
+      /* CREATE CARD */
+      function createDatastreamCard(datastream, cardIndex) {
+        const cardElement = document.createElement('div');
+
+        const themeIndex = cardIndex % CARD_THEME_COUNT;
+
+        cardElement.className =
+          `datastream-card datastream-card--theme-${themeIndex}`;
+
+        const headerElement = document.createElement('div');
+        headerElement.className = 'datastream-card__header';
+
+        const labelElement = document.createElement('div');
+        labelElement.className = 'datastream-card__label';
+
+        const valueElement = document.createElement('div');
+        valueElement.className = 'datastream-card__value';
+
+        valueElement.appendChild(
+          document.createTextNode('')
+        );
+
+        const unitElement = document.createElement('span');
+        unitElement.className = 'datastream-card__unit';
+
+        valueElement.appendChild(unitElement);
+
+        headerElement.append(
+          createIconElement(datastream.label),
+          labelElement
+        );
+
+        cardElement.append(
+          headerElement,
+          valueElement
+        );
+
+        gridElement.appendChild(cardElement);
+
+        return {
+          cardElement,
+          labelElement,
+          valueElement,
+          unitElement
+        };
+      }
+
+      /* UPDATE CARD */
+      function updateDatastreamCard(card, datastream) {
+        const label =
+          datastream.label ||
+          `Stream ${datastream.index + 1}`;
+
+        const formattedValue =
+          formatDatastreamValue(datastream);
+
+        const unit = formattedValue.unit
+          ? ` ${formattedValue.unit}`
+          : '';
+
+        const isTextValue = !(
+          datastream.type === DATASTREAM_TYPES.INT ||
+          datastream.type === DATASTREAM_TYPES.DOUBLE
+        );
+
+        card.cardElement.classList.toggle(
+          'datastream-card--textual',
+          isTextValue
+        );
+
+        card.labelElement.textContent = label;
+        card.labelElement.title = label;
+
+        card.valueElement.firstChild.nodeValue =
+          formattedValue.text;
+
+        card.unitElement.textContent = unit;
+
+        card.valueElement.title =
+          `${formattedValue.text}${unit}`;
+      }
+
+      /* GET OR CREATE CARD */
+      function getOrCreateCard(datastream, cardIndex) {
+        let card = cardReferences.get(datastream.index);
+
+        if (!card) {
+          card = createDatastreamCard(
+            datastream,
+            cardIndex
+          );
+
+          cardReferences.set(datastream.index, card);
+        }
+
+        return card;
+      }
+
+      /* EMPTY STATE */
+      function showEmptyState() {
+        gridElement.style.display = 'none';
+        emptyStateElement.style.display = 'flex';
+      }
+
+      function showDatastreamGrid() {
+        gridElement.style.display = 'grid';
+        emptyStateElement.style.display = 'none';
+      }
+
+      /* INITIAL RENDER */
+      function renderDatastreams(datastreams) {
+        if (
+          !Array.isArray(datastreams) ||
+          datastreams.length === 0
+        ) {
+          showEmptyState();
+          return;
+        }
+
+        showDatastreamGrid();
+
+        datastreams.forEach((datastream, cardIndex) => {
+          const card = getOrCreateCard(
+            datastream,
+            cardIndex
+          );
+
+          updateDatastreamCard(card, datastream);
+        });
+      }
+
+      /* REAL-TIME UPDATE */
+      function handleValueUpdate(datastream) {
+        const card = getOrCreateCard(
+          datastream,
+          cardReferences.size
+        );
+
+        updateDatastreamCard(card, datastream);
+      }
+
+      /* BLYNK CALLBACKS */
+      bridge.setCallbacks({
+        onValueUpdated: handleValueUpdate,
+
+        onError: (message) => {
+          bridge.log(`onError: ${message}`);
+        }
+      });
+
+      /* INITIALIZATION */
+      async function initializeWidget() {
+        const theme = await bridge
+          .getTheme()
+          .catch(() => null);
+
+        applyTheme(theme);
+
+        const datastreams = await bridge
+          .getValues()
+          .catch(() => []);
+
+        renderDatastreams(datastreams);
+      }
+
+      initializeWidget();
+
+    })();
+  </script>
+</body>
+</html>
